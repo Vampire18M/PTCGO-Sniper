@@ -11,6 +11,10 @@ public class clsTradeOffer {
 	Boolean isDeck;
 	String owner;
 	int tradeValue;
+	int modi2000 = 90;
+	int modi1000 = 80;
+	int modi500  = 75;
+	int modir = 50;
 	
 	public clsTradeOffer(String offerID, String ownerID, String restlaufzeit){
 		this.offerID = offerID;
@@ -42,7 +46,39 @@ public class clsTradeOffer {
 			Card wantCard = (Card)wantiterator.next();
 			wval += wantCard.getValue();
 		}
-		tradeValue = oval - wval;
+//		tradeValue = (100/wval) * oval;
+		
+		
+		int tempmodi;
+		//Falls oval > 2000 
+		if(oval > 2000){
+			tempmodi = modi2000;
+		}else{
+			//Falls oval > 1000 
+			if(oval>1000){
+				tempmodi = modi1000;
+			}else{
+				//Falls oval > 500
+				if(oval>500){
+					tempmodi = modi500;
+					//Rest 
+				}else{
+					tempmodi = modir;
+				}
+			}
+		}
+		
+		// oval *= (100/tempmodi);
+		// tradeValue = oval - wval;
+		tradeValue = ((int)(oval*0.5) + (int)(oval*0.2))- wval;
+		//System.out.println("Ich denke: "+offiterator.toString()+" gegen " + wantiterator.toString() +" ist mit folgendem Faktor "+ tempmodi +" : " +tradeValue);
+	}
+	
+	void changemodi (int modi2000,int modi1000,int modi500,int modir){
+		this.modi2000=modi2000;
+		this.modi1000=modi1000;
+		this.modi500=modi500;
+		this.modir=modir;
 	}
 	
 	int getTradeValue(){

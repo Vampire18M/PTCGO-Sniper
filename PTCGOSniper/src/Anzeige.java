@@ -3,14 +3,21 @@ import java.awt.EventQueue;
 import java.awt.List;
 
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 
 import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -18,9 +25,9 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 
-public class Anzeige extends Thread{
+public class Anzeige extends Thread {
 
-	private JFrame frame;
+	private JFrame frmPtcgosniper;
 	public static JTable table;
 
 	/**
@@ -31,9 +38,9 @@ public class Anzeige extends Thread{
 			public void run() {
 				try {
 					Anzeige window = new Anzeige();
-					window.frame.setVisible(true);
+					window.frmPtcgosniper.setVisible(true);
 				} catch (Exception e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 			}
 		});
@@ -44,7 +51,7 @@ public class Anzeige extends Thread{
 	 */
 	public Anzeige() {
 		initialize();
-		frame.setVisible(true);
+		frmPtcgosniper.setVisible(true);
 	}
 
 	public static void addTableRow(int gewinn, String zeit, String ocard, String wcard){
@@ -74,35 +81,49 @@ public class Anzeige extends Thread{
 		    }
 
 		    tableColumn.setPreferredWidth( preferredWidth );
-		}
-		
+		}		
 	}
+	
+
 	
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 771, 576);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmPtcgosniper = new JFrame();
+		frmPtcgosniper.setAlwaysOnTop(true);
+		frmPtcgosniper.setTitle("PTCGO-Sniper");
+		frmPtcgosniper.setBounds(100, 100, 1915, 190);
+		frmPtcgosniper.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		DefaultTableModel model = new DefaultTableModel();
 		model.addColumn("Gewinn");
 		model.addColumn("Restzeit");
 		model.addColumn("Karte(n)");
 		model.addColumn("Kosten");
 		table = new JTable(model);
-		addTableRow(9999,"Restzeit","Karte(n)","Kosten");
+		addTableRow(1000,"Restzeit","Karte(n)","Kosten");
 		table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
-        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
-        table.setRowSorter(sorter);
-        
-        ArrayList<RowSorter.SortKey> sortKeys = new ArrayList<>(25);
-        sortKeys.add(new RowSorter.SortKey(0, SortOrder.DESCENDING));
-        sortKeys.add(new RowSorter.SortKey(3, SortOrder.DESCENDING));
-        sorter.setSortKeys(sortKeys);
-        
-		frame.getContentPane().add(table, BorderLayout.NORTH);
-		frame.repaint();
+        //TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
+        //table.setRowSorter(sorter);  
+        //ArrayList<RowSorter.SortKey> sortKeys = new ArrayList<>(4);
+        //sortKeys.add(new RowSorter.SortKey(0, SortOrder.DESCENDING));
+        //sorter.setSortKeys(sortKeys);
+        table.addMouseListener( new MouseAdapter()
+        {
+            public void mouseClicked(MouseEvent  e) 
+            {
+            	 if (e.getClickCount() == 1) {
+            	      JTable target = (JTable)e.getSource();
+            	      int row = target.getSelectedRow();
+            	      //System.out.println(row);
+            	      DefaultTableModel model = (DefaultTableModel) table.getModel();
+              		  model.removeRow(row);
+            	    }
+            }
+        });
+		frmPtcgosniper.getContentPane().add(table, BorderLayout.NORTH);
+		frmPtcgosniper.repaint();
+		
 	}
 	
 }

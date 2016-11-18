@@ -13,8 +13,8 @@ public class database {
 		c = null;
 	    try {
 	      Class.forName("org.sqlite.JDBC");
-	      String dbPath = "C:\\Users\\dsmai_000\\Documents\\PTCGO Sniper\\";
-	      c = DriverManager.getConnection("jdbc:sqlite:"+dbPath+"database.db");
+	      //String dbPath = "C:\\Users\\dsmai_000\\Documents\\PTCGO Sniper\\";
+	      c = DriverManager.getConnection("jdbc:sqlite:database.db");
 	    } catch ( Exception e ) {
 	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 	      System.exit(0);
@@ -27,13 +27,13 @@ public class database {
 		Statement stmt = null;		
 		try {
 			stmt = c.createStatement();
-		    ResultSet rs = stmt.executeQuery( "SELECT archID, CardName, Value, isHolo, isFA, isSR FROM CardData WHERE Booster NOT NULL;" );
+		    ResultSet rs = stmt.executeQuery( "SELECT archID, CardName, Value, isHolo, isFA, isSR FROM CardData WHERE Booster != \"null\";" );
 			while ( rs.next() ) {
 		    	String id = rs.getString("archID");
 		    	String CardName = rs.getString("CardName");
-		    	Boolean infoFA = (rs.getString("isFA")).contains("True");
-		    	Boolean infoSR = (rs.getString("isSR")).contains("True");
-		    	Boolean infoRV = (rs.getString("isHolo")).contains("True");
+		    	Boolean infoFA = (rs.getInt("isFA") == 1);
+		    	Boolean infoSR = (rs.getInt("isSR") == 1);
+		    	Boolean infoRV = (rs.getInt("isHolo") == 1);
 		    	if(infoRV&&!infoSR&&!!infoFA)
 	    			CardName = CardName + "_RV";
 		    	if(infoFA)
@@ -50,31 +50,67 @@ public class database {
 		
 	}
 	
-	//DB Update of Missing Informations (Name, Booster, Nummer, isHolo)
+	//DB Update must update Online Database
 	public static void exportCardData(String archID, String CardName){
-
 		Statement stmt = null;
 		String sql = "";
-		boolean isHolo = false;
-		ArrayList <String> parts = new ArrayList<String>(Arrays.asList((CardName.split("_"))));
-		
+		int isHolo = 0;
+		ArrayList <String> parts = new ArrayList<String>(Arrays.asList((CardName.split("_"))));	
 		//Aufbereiten der Daten
 		if (parts.get(1).equals("Promo")) 
 			parts.remove(1);
 		if (parts.size() >= 4) 
-			isHolo = true;
-		
+			isHolo = 1;
 		//Update
 		try {
 			stmt = c.createStatement();
-			sql = "UPDATE CardData SET CardName = \""+parts.get(0)+"\", Booster = \""+parts.get(1)+"\", Nummer = "+parts.get(2)+", isHolo = \""+isHolo+"\" WHERE archID = \""+archID+"\";";
+			sql = "UPDATE CardData SET CardName = \""+parts.get(0)+"\", Booster = \""+parts.get(1)+"\", Nummer = "+parts.get(2)+", isHolo = "+isHolo+" WHERE archID = \""+archID+"\";";
 		    stmt.executeUpdate(sql);
 		     c.commit();
+		     OnlineImporter.OnlineUpdate(sql);
 		}catch ( Exception e ) {
-			//System.out.println(sql);
+			;
+		}		
+	}
+	
+	public static void resetDatabase(){
+		Statement stmt = null;
+		String sql = "";
+		try {
+			stmt = c.createStatement();
+			sql = "DROP TABLE IF EXISTS CardData;";
+			stmt.executeUpdate(sql);
+		    c.commit();
+		    
+		}catch ( Exception e ){
+			
 		}
 		
-		
+		stmt = null;
+		sql = "";
+		try {
+		stmt = c.createStatement();
+		sql = "CREATE TABLE CardData (CardName STRING(127),Booster STRING(12), Nummer INTEGER, Value INTEGER,isHolo INTEGER,isSR INTEGER,isFA BOOLEAN,searchText TEXT,archID STRING(50)  PRIMARY KEY);";
+		stmt.executeUpdate(sql);
+	    c.commit();
+		}catch ( Exception e ){
+			
+		}
 	}
+	
+	
+	public static void InsertToLocal(String CardName, String Booster, int Nummer, int Value, int isHolo, int isSR, int isFa, String searchText, String archID){
+		Statement stmt = null;
+		String sql = "";
+		try {
+			stmt = c.createStatement();
+			sql = "INSERT INTO CardData (CardName,Booster,Nummer,Value,isHolo,isSR,isFA,searchText,archID)VALUES (\""+CardName+"\",\""+Booster+"\","+Nummer+","+Value+","+isHolo+","+isSR+","+isFa+",\""+searchText+"\",\""+archID+"\");";
+		    stmt.executeUpdate(sql);
+		     c.commit();
+		}catch ( Exception e ){
+			
+		}
+	}
+	
 	
 }

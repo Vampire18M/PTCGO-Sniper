@@ -8,7 +8,8 @@ public class JsonParser {
 	
 	public static void parseOffer(String offer){
 	JSONParser parser = new JSONParser();
-	 try {	 
+	 try {
+		 Boolean newOrder = true;
          Object obj = parser.parse(offer);
          JSONObject jsonObject = (JSONObject) obj;
          String tradeID = (String) jsonObject.get("id");
@@ -18,10 +19,12 @@ public class JsonParser {
          Object wantedList = jsonObject.get("cardPrice");
          clsTradeOffer newTrade;
          if(database.tradeIDs.contains(tradeID)){
+        	 newOrder = false;
         	 return;
          }else{
         	 newTrade = new clsTradeOffer(tradeID,author,restlaufzeit);
         	 database.offerList.add(newTrade);
+        	 database.tradeIDs.add(tradeID);
          }
          
          //Angebot Karten Prüfen und ggf in DB einpflegen
@@ -62,9 +65,9 @@ public class JsonParser {
          
      //Berechne Trade Value
          newTrade.setTradeValue();
-         if(newTrade.getTradeValue() > 100){
+         if(newTrade.getTradeValue() > 15 && newOrder){
         	 newTrade.addTable();
-        	 System.out.println(newTrade.getTradeValue()+"  -----  "+newTrade.tradeInfo());
+        	 //System.out.println(newTrade.getTradeValue()+"  -----  "+newTrade.tradeInfo());
          }
          
          
